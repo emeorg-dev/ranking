@@ -83,6 +83,7 @@ export function useCompetition(
   }, [setData]);
 
   return {
+    data,
     addTeam,
     removeTeam,
     addRound,
