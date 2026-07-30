@@ -1,56 +1,23 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { CompetitionData, Team, Score, TeamWithScores } from '@/lib/types';
+import { useCallback } from 'react';
+import { CompetitionData } from '@/lib/types';
+import { getEmptyData, getDemoData } from '@/lib/competition/default-data';
+import { calculateRanking, assignRanks } from '@/lib/competition/ranking';
 
-const SAMPLE_DATA: CompetitionData = {
-  teams: [
-    { id: '1', name: 'Team Alpha' },
-    { id: '2', name: 'Team Beta' },
-    { id: '3', name: 'Team Gamma' },
-    { id: '4', name: 'Team Delta' },
-  ],
-  scores: [
-    // Round 1
-    { teamId: '1', round: 1, score: 95 },
-    { teamId: '2', round: 1, score: 87 },
-    { teamId: '3', round: 1, score: 92 },
-    { teamId: '4', round: 1, score: 89 },
-    // Round 2
-    { teamId: '1', round: 2, score: 88 },
-    { teamId: '2', round: 2, score: 91 },
-    { teamId: '3', round: 2, score: 85 },
-    { teamId: '4', round: 2, score: 94 },
-    // Round 3
-    { teamId: '1', round: 3, score: 92 },
-    { teamId: '2', round: 3, score: 86 },
-    { teamId: '3', round: 3, score: 88 },
-    { teamId: '4', round: 3, score: 91 },
-    // Round 4
-    { teamId: '1', round: 4, score: 89 },
-    { teamId: '2', round: 4, score: 93 },
-    { teamId: '3', round: 4, score: 91 },
-    { teamId: '4', round: 4, score: 87 },
-    // Round 5
-    { teamId: '1', round: 5, score: 94 },
-    { teamId: '2', round: 5, score: 88 },
-    { teamId: '3', round: 5, score: 89 },
-    { teamId: '4', round: 5, score: 92 },
-  ],
-};
-
-export function useCompetition(initialData: CompetitionData) {
-  const [data, setData] = useState<CompetitionData>(initialData);
-
+export function useCompetition(
+  data: CompetitionData,
+  setData: React.Dispatch<React.SetStateAction<CompetitionData>>
+) {
   const addTeam = useCallback((name: string) => {
     setData((prev) => ({
       ...prev,
       teams: [
         ...prev.teams,
-        { id: String(Date.now()), name },
+        { id: crypto.randomUUID(), name },
       ],
     }));
-  }, []);
+  }, [setData]);
 
   const removeTeam = useCallback((teamId: string) => {
     setData((prev) => ({
@@ -58,71 +25,71 @@ export function useCompetition(initialData: CompetitionData) {
       teams: prev.teams.filter((t) => t.id !== teamId),
       scores: prev.scores.filter((s) => s.teamId !== teamId),
     }));
-  }, []);
+  }, [setData]);
 
-  const setScore = useCallback((teamId: string, round: number, score: number) => {
+  const addRound = useCallback((name: string) => {
+    setData((prev) => {
+      const nextOrder = prev.rounds.length > 0
+        ? Math.max(...prev.rounds.map((r) => r.order)) + 1
+        : 1;
+      return {
+        ...prev,
+        rounds: [
+          ...prev.rounds,
+          { id: crypto.randomUUID(), name, order: nextOrder },
+        ],
+      };
+    });
+  }, [setData]);
+
+  const removeRound = useCallback((roundId: string) => {
+    setData((prev) => ({
+      ...prev,
+      rounds: prev.rounds.filter((r) => r.id !== roundId),
+      scores: prev.scores.filter((s) => s.roundId !== roundId),
+    }));
+  }, [setData]);
+
+  const setScore = useCallback((teamId: string, roundId: string, value: number | null) => {
     setData((prev) => {
       const existingIndex = prev.scores.findIndex(
-        (s) => s.teamId === teamId && s.round === round
+        (s) => s.teamId === teamId && s.roundId === roundId
       );
 
       if (existingIndex >= 0) {
         const newScores = [...prev.scores];
-        newScores[existingIndex] = { teamId, round, score };
+        newScores[existingIndex] = { teamId, roundId, value };
         return { ...prev, scores: newScores };
       }
 
       return {
         ...prev,
-        scores: [...prev.scores, { teamId, round, score }],
+        scores: [...prev.scores, { teamId, roundId, value }],
       };
     });
-  }, []);
+  }, [setData]);
 
-  const getMaxRound = useCallback(() => {
-    return Math.max(...data.scores.map((s) => s.round), 0);
-  }, [data.scores]);
-
-  const getTeamScoresForRound = useCallback((teamId: string, round: number) => {
-    return data.scores.find((s) => s.teamId === teamId && s.round === round)?.score ?? 0;
-  }, [data.scores]);
-
-  const getTeamsWithScores = useCallback((upToRound: number) => {
-    return data.teams
-      .map((team) => {
-        const scores: number[] = [];
-        let total = 0;
-
-        for (let round = 1; round <= upToRound; round++) {
-          const score = data.scores.find(
-            (s) => s.teamId === team.id && s.round === round
-          )?.score ?? 0;
-          scores.push(score);
-          total += score;
-        }
-
-        return { ...team, scores, total };
-      })
-      .sort((a, b) => b.total - a.total);
-  }, [data.teams, data.scores]);
+  const getRankedTeams = useCallback((activeRoundIds?: Set<string>) => {
+    const ids = activeRoundIds ?? new Set(data.rounds.map((r) => r.id));
+    return assignRanks(calculateRanking(data, ids));
+  }, [data]);
 
   const reset = useCallback(() => {
-    setData(SAMPLE_DATA);
-  }, []);
+    setData(getEmptyData());
+  }, [setData]);
+
+  const loadDemo = useCallback(() => {
+    setData(getDemoData());
+  }, [setData]);
 
   return {
-    data,
-    setData,
     addTeam,
     removeTeam,
+    addRound,
+    removeRound,
     setScore,
-    getMaxRound,
-    getTeamScoresForRound,
-    getTeamsWithScores,
+    getRankedTeams,
     reset,
+    loadDemo,
   };
-}
-
-export function getInitialData(): CompetitionData {
-  return SAMPLE_DATA;
 }

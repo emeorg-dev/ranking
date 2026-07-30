@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
-import { TeamWithScores } from '@/lib/types';
+import { CompetitionData } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { calculateRanking, assignRanks } from '@/lib/competition/ranking';
 
 interface RankingScreenProps {
-  teamsWithScores: TeamWithScores[];
-  maxRound: number;
+  data: CompetitionData;
   active?: boolean;
 }
 
@@ -19,14 +19,20 @@ const PODIUM = [
 ];
 
 export function RankingScreen({
-  teamsWithScores,
-  maxRound,
+  data,
   active = true,
 }: RankingScreenProps) {
-  const [selectedRound, setSelectedRound] = useState(maxRound);
+  const [selectedRoundIndex, setSelectedRoundIndex] = useState(
+    Math.max(0, data.rounds.length - 1)
+  );
   const [revealed, setRevealed] = useState(false);
 
-  const rounds = Array.from({ length: maxRound }, (_, i) => i + 1);
+  // Sync selectedRoundIndex if rounds are removed
+  useEffect(() => {
+    setSelectedRoundIndex((prev) =>
+      data.rounds.length === 0 ? 0 : Math.min(prev, data.rounds.length - 1)
+    );
+  }, [data.rounds.length]);
 
   // Toggle reveal with the R key while the ranking screen is visible
   useEffect(() => {
@@ -53,14 +59,9 @@ export function RankingScreen({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [active]);
 
-  const rankedTeams = teamsWithScores
-    .map((team) => {
-      const totalUpToRound = team.scores
-        .slice(0, selectedRound)
-        .reduce((sum, score) => sum + score, 0);
-      return { ...team, totalUpToRound };
-    })
-    .sort((a, b) => b.totalUpToRound - a.totalUpToRound);
+  const activeRounds = data.rounds.slice(0, selectedRoundIndex + 1);
+  const activeRoundIds = new Set(activeRounds.map((r) => r.id));
+  const rankedTeams = assignRanks(calculateRanking(data, activeRoundIds));
 
   return (
     <div className="w-full px-4 py-8 sm:px-6 sm:py-10">
@@ -93,24 +94,24 @@ export function RankingScreen({
       </header>
 
       {/* Round selector */}
-      {maxRound > 1 && (
+      {data.rounds.length > 1 && (
         <div className="mb-8 flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-xs uppercase tracking-wide text-muted-foreground">
             Through round
           </span>
-          {rounds.map((round) => (
+          {data.rounds.map((round, index) => (
             <Button
-              key={round}
+              key={round.id}
               variant="ghost"
               size="sm"
-              onClick={() => setSelectedRound(round)}
+              onClick={() => setSelectedRoundIndex(index)}
               className={cn(
                 'h-7 min-w-9 px-2 text-xs tabular-nums',
-                selectedRound === round &&
+                selectedRoundIndex === index &&
                   'bg-foreground text-background hover:bg-foreground/90 hover:text-background'
               )}
             >
-              {round}
+              {round.name}
             </Button>
           ))}
         </div>
@@ -119,8 +120,11 @@ export function RankingScreen({
       {/* Rankings */}
       <ol className="flex flex-col gap-2.5">
         {rankedTeams.map((team, index) => {
-          const roundScores = team.scores.slice(0, selectedRound);
-          const podium = index < 3 ? PODIUM[index] : null;
+          const roundScores = activeRounds.map(r => team.scores[r.id]);
+          // Use explicit rank for podium
+          const podiumIndex = team.rank - 1;
+          const podium = podiumIndex >= 0 && podiumIndex < 3 ? PODIUM[podiumIndex] : null;
+          
           // Reveal from last place up to first for a countdown feel
           const revealDelay = (rankedTeams.length - 1 - index) * 110;
 
@@ -159,12 +163,12 @@ export function RankingScreen({
                 <span
                   className={cn(
                     'flex size-9 shrink-0 items-center justify-center rounded-full border text-sm font-semibold tabular-nums',
-                    index === 0
+                    team.rank === 1
                       ? 'border-primary/40 text-foreground'
                       : 'text-muted-foreground'
                   )}
                 >
-                  {index + 1}
+                  {team.rank}
                 </span>
 
                 {/* Team */}
@@ -178,11 +182,11 @@ export function RankingScreen({
                     )}
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    {roundScores.map((score, i) => (
-                      <span key={i} className="tabular-nums">
-                        R{i + 1}
+                    {activeRounds.map((r, i) => (
+                      <span key={r.id} className="tabular-nums">
+                        {r.name}
                         <span className="ml-1 font-medium text-foreground/80">
-                          {score}
+                          {team.scores[r.id] ?? '-'}
                         </span>
                       </span>
                     ))}
@@ -192,11 +196,11 @@ export function RankingScreen({
                 {/* Total */}
                 <div className="shrink-0 text-right">
                   <div className="text-2xl font-semibold tabular-nums sm:text-3xl">
-                    {team.totalUpToRound}
+                    {team.total}
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    {roundScores.length} round
-                    {roundScores.length !== 1 ? 's' : ''}
+                    {activeRounds.length} round
+                    {activeRounds.length !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>

@@ -1,28 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useCompetition, getInitialData } from '@/hooks/use-competition';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useState, useCallback } from 'react';
+import { useCompetition } from '@/hooks/use-competition';
+import { useCompetitionStorage } from '@/hooks/use-local-storage';
 import { useShortcuts } from '@/hooks/use-shortcuts';
-import { CompetitionData } from '@/lib/types';
+import { getEmptyData } from '@/lib/competition/default-data';
 import { ScoreEntryScreen } from '@/components/score-entry/score-entry-screen';
 import { RankingScreen } from '@/components/ranking/ranking-screen';
 import { ScreenNavigation } from '@/components/navigation/screen-navigation';
 
 export function RankingApp() {
   const [currentScreen, setCurrentScreen] = useState<'entry' | 'ranking'>('entry');
-  const [savedData, setSavedData, isHydrated] = useLocalStorage<CompetitionData>(
-    'competition-data',
-    getInitialData()
-  );
-  const competition = useCompetition(savedData);
-
-  // Sync competition data to localStorage
-  useEffect(() => {
-    if (isHydrated) {
-      setSavedData(competition.data);
-    }
-  }, [competition.data, setSavedData, isHydrated]);
+  const [savedData, setSavedData, isHydrated] = useCompetitionStorage(getEmptyData());
+  const competition = useCompetition(savedData, setSavedData);
 
   // Handle keyboard shortcuts
   useShortcuts({
@@ -41,9 +31,6 @@ export function RankingApp() {
       </div>
     );
   }
-
-  const maxRound = competition.getMaxRound();
-  const teamsWithScores = competition.getTeamsWithScores(maxRound);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -71,7 +58,8 @@ export function RankingApp() {
               onSetScore={competition.setScore}
               onAddTeam={competition.addTeam}
               onRemoveTeam={competition.removeTeam}
-              maxRound={maxRound}
+              onAddRound={() => competition.addRound(`Ronda ${competition.data.rounds.length + 1}`)}
+              onRemoveRound={competition.removeRound}
             />
           </div>
 
@@ -81,8 +69,7 @@ export function RankingApp() {
             aria-hidden={currentScreen !== 'ranking'}
           >
             <RankingScreen
-              teamsWithScores={teamsWithScores}
-              maxRound={maxRound}
+              data={competition.data}
               active={currentScreen === 'ranking'}
             />
           </div>

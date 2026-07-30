@@ -18,9 +18,8 @@ export function useShortcuts({
 }: ShortcutHandlers) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // 1. Si el usuario está escribiendo dentro de un campo de formulario, ignoramos los atajos de letras
-      // Para los atajos con modificadores, los permitimos aunque esté en un input, pero en timer se prefiere no interrumpir
-      // Sin embargo, si son atajos globales con Cmd/Ctrl, normalmente se verifican antes del form check.
+      // 1. Los atajos globales con Cmd/Ctrl se procesan primero, por lo que funcionan incluso
+      // si un campo de formulario (input) tiene el foco. Esto permite navegación rápida.
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
       
       if (isCtrlOrCmd) {
