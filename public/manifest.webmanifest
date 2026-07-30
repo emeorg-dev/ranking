@@ -1,0 +1,48 @@
+{
+  "name": "Timer",
+  "short_name": "Timer",
+  "description": "Un temporizador minimalista y accesible que anuncia el tiempo restante o transcurrido por voz en múltiples idiomas.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#2a9bb5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-light-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-light-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-light-44x44.png",
+      "sizes": "44x44",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-light-34x34.png",
+      "sizes": "34x34",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
