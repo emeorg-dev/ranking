@@ -4,7 +4,7 @@ import { RotateCcw } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Kbd, KbdGroup } from '@/components/ui/kbd';
-import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ScreenNavigationProps {
   currentScreen: 'entry' | 'ranking';
@@ -26,24 +26,15 @@ export function ScreenNavigation({
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         {/* Segmented tabs */}
-        <nav aria-label="Pantallas" className="flex items-center gap-1 rounded-lg bg-muted/60 p-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              aria-current={currentScreen === tab.id ? 'page' : undefined}
-              onClick={() => onScreenChange(tab.id)}
-              className={cn(
-                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                currentScreen === tab.id
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+        <Tabs value={currentScreen} onValueChange={(value) => onScreenChange(value as 'entry' | 'ranking')}>
+          <TabsList>
+            {TABS.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
         <div className="flex items-center gap-3">
           <p className="hidden items-center gap-1.5 text-xs text-muted-foreground lg:flex">
