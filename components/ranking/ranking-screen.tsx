@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import { RankingHeader } from '@/components/ranking/ranking-header';
 import { RankingList } from '@/components/ranking/ranking-list';
 import { RoundSelector } from '@/components/ranking/round-selector';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useRankingReveal } from '@/hooks/use-ranking-reveal';
 import { useRankingRound } from '@/hooks/use-ranking-round';
 import { assignRanks, calculateRanking } from '@/lib/competition/ranking';
@@ -36,11 +37,10 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
   const hasPendingScores = rankedTeams.some((team) => !team.isComplete);
 
   return (
-    // scrollContainerRef es el elemento que tiene overflow-y-auto.
-    // El hook controla el scroll sobre este div, no sobre window.
-    <div
-      ref={reveal.scrollContainerRef}
-      className="h-full overflow-y-auto overscroll-contain"
+    // El hook controla el scroll sobre el viewport interno del ScrollArea
+    <ScrollArea
+      viewportRef={reveal.scrollContainerRef}
+      className="h-full"
     >
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
         <RankingHeader
@@ -70,6 +70,6 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
           itemRefs={reveal.itemRefs}
         />
       </div>
-    </div>
+    </ScrollArea>
   );
 }
