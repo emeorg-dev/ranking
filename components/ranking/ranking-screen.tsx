@@ -22,7 +22,12 @@ const PODIUM = [
 ];
 
 export function RankingScreen({ data, active = true }: RankingScreenProps) {
-  const orderedRounds = useMemo(() => sortRounds(data.rounds), [data.rounds]);
+  const orderedRounds = useMemo(() => {
+    const allRounds = sortRounds(data.rounds);
+    return allRounds.filter((round) =>
+      data.scores.some((score) => score.roundId === round.id && score.value !== null)
+    );
+  }, [data.rounds, data.scores]);
 
   const [selectedRoundIndex, setSelectedRoundIndex] = useState(
     Math.max(0, orderedRounds.length - 1)
