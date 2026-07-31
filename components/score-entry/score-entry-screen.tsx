@@ -97,7 +97,7 @@ export function ScoreEntryScreen({
   };
 
   return (
-    <div className="w-full px-4 py-8 sm:px-6 sm:py-10">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-8">
         <Input
           value={data.name}

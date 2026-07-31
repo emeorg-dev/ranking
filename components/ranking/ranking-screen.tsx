@@ -81,7 +81,7 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
   const hasPendingScores = rankedTeams.some((team) => !team.isComplete);
 
   return (
-    <div className="w-full px-4 py-8 sm:px-6 sm:py-10">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
