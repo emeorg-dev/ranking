@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,9 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
   const [selectedRoundIndex, setSelectedRoundIndex] = useState(
     Math.max(0, orderedRounds.length - 1)
   );
-  const [revealed, setRevealed] = useState(false);
+
+  const [revealedCount, setRevealedCount] = useState(0);
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   const previousRoundsCountRef = useRef(orderedRounds.length);
 
@@ -54,6 +56,33 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
     previousRoundsCountRef.current = orderedRounds.length;
   }, [orderedRounds.length]);
 
+  const activeRounds = orderedRounds.slice(0, selectedRoundIndex + 1);
+  const activeRoundIds = new Set(activeRounds.map((r) => r.id));
+  const rankedTeams = assignRanks(calculateRanking(data, activeRoundIds));
+
+  const hasPendingScores = rankedTeams.some((team) => !team.isComplete);
+  const revealed = revealedCount > 0;
+
+  const handleToggleReveal = useCallback(() => {
+    if (rankedTeams.length === 0) return;
+
+    if (revealedCount > 0) {
+      setRevealedCount(0);
+    } else {
+      const lastIndex = rankedTeams.length - 1;
+      if (itemRefs.current[lastIndex]) {
+        // block: 'nearest' evita saltos iniciales bruscos; solo baja lo necesario para ver el último
+        itemRefs.current[lastIndex]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+        setTimeout(() => setRevealedCount(1), 1000);
+      } else {
+        setRevealedCount(1);
+      }
+    }
+  }, [revealedCount, rankedTeams.length]);
+
   // Toggle reveal with the R key while the ranking screen is visible
   useEffect(() => {
     if (!active) return;
@@ -71,19 +100,95 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
 
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
-        setRevealed((prev) => !prev);
+        handleToggleReveal();
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [active]);
+  }, [active, handleToggleReveal]);
 
-  const activeRounds = orderedRounds.slice(0, selectedRoundIndex + 1);
-  const activeRoundIds = new Set(activeRounds.map((r) => r.id));
-  const rankedTeams = assignRanks(calculateRanking(data, activeRoundIds));
+  // Secuencia de revelación (cuenta regresiva)
+  useEffect(() => {
+    if (revealedCount === 0 || revealedCount >= rankedTeams.length) return;
 
-  const hasPendingScores = rankedTeams.some((team) => !team.isComplete);
+    const teamsLeft = rankedTeams.length - revealedCount;
+    let delay = Math.max(600, 800 - rankedTeams.length * 15);
+
+    if (teamsLeft === 3) delay = 1500;
+    else if (teamsLeft === 2) delay = 2000;
+    else if (teamsLeft === 1) delay = 3500;
+
+    const timer = setTimeout(() => {
+      setRevealedCount((c) => c + 1);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [revealedCount, rankedTeams.length]);
+
+  const targetScrollY = useRef<number | null>(null);
+
+  // Cancelar el auto-scroll si el usuario mueve la rueda o toca la pantalla
+  useEffect(() => {
+    const stopTracking = () => {
+      targetScrollY.current = null;
+    };
+    window.addEventListener('wheel', stopTracking, { passive: true });
+    window.addEventListener('touchstart', stopTracking, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', stopTracking);
+      window.removeEventListener('touchstart', stopTracking);
+    };
+  }, []);
+
+  // Bucle de animación para un scroll mantecoso y continuo (lerp)
+  useEffect(() => {
+    let animationFrameId: number;
+
+    const loop = () => {
+      if (targetScrollY.current !== null) {
+        const currentY = window.scrollY;
+        const targetY = targetScrollY.current;
+        const diff = targetY - currentY;
+
+        if (Math.abs(diff) > 1) {
+          // Factor de suavizado (lerp). Menor = más lento y continuo.
+          const step = diff * 0.05;
+          window.scrollBy(0, step);
+        }
+      }
+      animationFrameId = requestAnimationFrame(loop);
+    };
+
+    animationFrameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
+
+  // Actualizar el objetivo del scroll cuando se revela un nuevo elemento
+  useEffect(() => {
+    if (revealedCount > 0 && revealedCount <= rankedTeams.length) {
+      const currentIndex = rankedTeams.length - revealedCount;
+      const el = itemRefs.current[currentIndex];
+
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+
+        // Si el elemento revelado está por encima de la mitad de la pantalla,
+        // actualizamos el objetivo del scroll para centrarlo.
+        if (rect.top < viewportHeight * 0.5) {
+          const absoluteY = rect.top + window.scrollY;
+          // Calcular la posición Y que dejaría el elemento en el centro exacto
+          targetScrollY.current = Math.max(0, absoluteY - viewportHeight / 2 + rect.height / 2);
+        }
+      }
+    } else {
+      // Detener el auto-scroll al ocultar todo
+      if (revealedCount === 0) {
+        targetScrollY.current = null;
+      }
+    }
+  }, [revealedCount, rankedTeams.length]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
@@ -103,7 +208,7 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
         <Button
           variant={revealed ? 'outline' : 'default'}
           size="sm"
-          onClick={() => setRevealed((prev) => !prev)}
+          onClick={handleToggleReveal}
           className="gap-2"
         >
           {revealed ? (
@@ -153,12 +258,14 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
           const podiumIndex = team.rank - 1;
           const podium = podiumIndex >= 0 && podiumIndex < 3 ? PODIUM[podiumIndex] : null;
 
-          // Reveal from last place up to first for a countdown feel
-          const revealDelay = (rankedTeams.length - 1 - index) * 110;
+          const isRevealed = index >= rankedTeams.length - revealedCount;
 
           return (
             <li
               key={team.id}
+              ref={(el) => {
+                itemRefs.current[index] = el;
+              }}
               className={cn(
                 'animate-fade-in-up relative overflow-hidden rounded-xl border bg-card p-4 sm:p-5',
                 podium?.ring
@@ -170,9 +277,8 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
                 aria-hidden="true"
                 className={cn(
                   'pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-widest text-muted-foreground transition-opacity duration-500',
-                  revealed ? 'opacity-0' : 'opacity-100'
+                  isRevealed ? 'opacity-0' : 'opacity-100'
                 )}
-                style={{ transitionDelay: `${revealed ? revealDelay : 0}ms` }}
               >
                 <Lock className="size-3.5" />
                 Ranking oculto
@@ -181,9 +287,8 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
               <div
                 className={cn(
                   'flex items-center gap-4 transition-all duration-700 ease-out',
-                  revealed ? 'blur-0 opacity-100' : 'select-none blur-md opacity-40'
+                  isRevealed ? 'blur-0 opacity-100' : 'select-none blur-md opacity-40'
                 )}
-                style={{ transitionDelay: `${revealed ? revealDelay : 0}ms` }}
               >
                 {/* Posición */}
                 <span
