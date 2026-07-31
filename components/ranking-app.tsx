@@ -71,9 +71,9 @@ export function RankingApp() {
             />
           </section>
 
-          {/* Pantalla de ranking */}
+          {/* Pantalla de ranking — el scroll lo gestiona RankingScreen internamente */}
           <section
-            className="h-full w-full shrink-0 overflow-y-auto"
+            className="h-full w-full shrink-0 overflow-hidden"
             aria-hidden={currentScreen !== 'ranking'}
             {...(currentScreen !== 'ranking' ? { inert: true } : {})}
           >
