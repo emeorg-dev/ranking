@@ -61,6 +61,7 @@ export function RankingApp() {
               }
               onRemoveRound={competition.removeRound}
               onUpdateCompetitionName={competition.updateCompetitionName}
+              onToggleShowName={competition.toggleShowName}
               onUpdateTeamName={competition.updateTeamName}
               onUpdateRoundName={competition.updateRoundName}
             />

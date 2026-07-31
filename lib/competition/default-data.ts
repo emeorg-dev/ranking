@@ -3,6 +3,7 @@ import type { CompetitionData } from '@/lib/types';
 export function getEmptyData(name = 'Nueva Competencia'): CompetitionData {
   return {
     name,
+    showName: true,
     teams: [],
     rounds: [],
     scores: [],
@@ -23,6 +24,7 @@ export function getDemoData(): CompetitionData {
 
   return {
     name: 'Competencia de Demostración',
+    showName: true,
     teams: [
       { id: t1, name: 'Team Alpha', order: 1 },
       { id: t2, name: 'Team Beta', order: 2 },

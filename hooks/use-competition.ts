@@ -133,6 +133,13 @@ export function useCompetition(
     [setData]
   );
 
+  const toggleShowName = useCallback(
+    (showName: boolean) => {
+      setData((prev) => ({ ...prev, showName }));
+    },
+    [setData]
+  );
+
   const reset = useCallback(() => {
     setData(getEmptyData());
   }, [setData]);
@@ -151,6 +158,7 @@ export function useCompetition(
     updateRoundName,
     setScore,
     updateCompetitionName,
+    toggleShowName,
     reset,
     loadDemo,
   };

@@ -18,6 +18,7 @@ export interface Score {
 
 export interface CompetitionData {
   name: string;
+  showName: boolean;
   teams: Team[];
   rounds: Round[];
   scores: Score[];

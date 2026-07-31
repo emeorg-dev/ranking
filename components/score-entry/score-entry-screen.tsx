@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useMemo,useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Search, X } from 'lucide-react';
 
 import { ConfirmationDialog } from '@/components/competition/confirmation-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { sortRounds } from '@/lib/competition/rounds';
 import { createScoreMap, getScoreValue } from '@/lib/competition/scores';
-import type { CompetitionData, Round,Team } from '@/lib/types';
+import type { CompetitionData, Round, Team } from '@/lib/types';
 
 interface ScoreEntryScreenProps {
   data: CompetitionData;
@@ -18,6 +20,7 @@ interface ScoreEntryScreenProps {
   onAddRound: () => void;
   onRemoveRound: (roundId: string) => void;
   onUpdateCompetitionName: (name: string) => void;
+  onToggleShowName: (checked: boolean) => void;
   onUpdateTeamName: (teamId: string, name: string) => void;
   onUpdateRoundName: (roundId: string, name: string) => void;
 }
@@ -30,6 +33,7 @@ export function ScoreEntryScreen({
   onAddRound,
   onRemoveRound,
   onUpdateCompetitionName,
+  onToggleShowName,
   onUpdateTeamName,
   onUpdateRoundName,
 }: ScoreEntryScreenProps) {
@@ -99,12 +103,29 @@ export function ScoreEntryScreen({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-8">
-        <Input
-          value={data.name}
-          onChange={(e) => onUpdateCompetitionName(e.target.value)}
-          className="mb-1 h-auto border-transparent bg-transparent px-0 text-2xl font-semibold tracking-tight shadow-none hover:border-input focus-visible:border-input sm:text-3xl"
-          aria-label="Nombre de la competencia"
-        />
+        <div className="mb-4 max-w-2xl">
+          <div className="flex items-center justify-between mb-3">
+            <Label htmlFor="competition-name" className="text-sm font-semibold">Nombre de la competencia</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="show-name" className="text-xs text-muted-foreground cursor-pointer">
+                Mostrar nombre
+              </Label>
+              <Switch
+                id="show-name"
+                checked={data.showName !== false}
+                onCheckedChange={onToggleShowName}
+              />
+            </div>
+          </div>
+          <Input
+            id="competition-name"
+            value={data.name}
+            onChange={(e) => onUpdateCompetitionName(e.target.value)}
+            disabled={data.showName === false}
+            className="h-auto px-3 py-2 text-lg font-medium shadow-none sm:text-xl"
+            aria-label="Nombre de la competencia"
+          />
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Ingreso de puntajes · {data.teams.length} equipo{data.teams.length !== 1 ? 's' : ''} ·{' '}
           {roundsCount} ronda{roundsCount !== 1 ? 's' : ''}

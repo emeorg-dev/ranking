@@ -84,9 +84,11 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
-            {data.name}
-          </h1>
+          {data.showName !== false && (
+            <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+              {data.name}
+            </h1>
+          )}
           <h2 className="mt-0.5 text-base font-medium text-muted-foreground">Ranking</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {revealed ? 'Ranking visible' : 'Ranking oculto — mostrar cuando esté listo'}
