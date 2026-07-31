@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Kbd } from '@/components/ui/kbd';
@@ -13,6 +13,7 @@ interface RankingHeaderProps {
   /** true solo mientras la secuencia de revelación avanza automáticamente. */
   isPlaying: boolean;
   onToggleReveal: () => void;
+  onToggleInstant: () => void;
 }
 
 export function RankingHeader({
@@ -21,6 +22,7 @@ export function RankingHeader({
   isRevealing,
   isPlaying,
   onToggleReveal,
+  onToggleInstant,
 }: RankingHeaderProps) {
   let statusText: string;
 
@@ -44,20 +46,33 @@ export function RankingHeader({
         <p className="mt-1 text-sm text-muted-foreground">{statusText}</p>
       </div>
 
-      <Button
-        variant={isRevealing ? 'outline' : 'default'}
-        size="sm"
-        onClick={onToggleReveal}
-        className="gap-2"
-      >
-        {isRevealing ? (
-          <EyeOff className="size-4" aria-hidden="true" />
-        ) : (
-          <Eye className="size-4" aria-hidden="true" />
-        )}
-        {isRevealing ? 'Ocultar ranking' : 'Mostrar ranking'}
-        <Kbd>R</Kbd>
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onToggleInstant}
+          className="gap-2"
+        >
+          <Zap className="size-4" aria-hidden="true" />
+          Vista rápida
+          <Kbd>Z</Kbd>
+        </Button>
+
+        <Button
+          variant={isRevealing ? 'outline' : 'default'}
+          size="sm"
+          onClick={onToggleReveal}
+          className="gap-2"
+        >
+          {isRevealing ? (
+            <EyeOff className="size-4" aria-hidden="true" />
+          ) : (
+            <Eye className="size-4" aria-hidden="true" />
+          )}
+          {isRevealing ? 'Ocultar ranking' : 'Mostrar ranking'}
+          <Kbd>R</Kbd>
+        </Button>
+      </div>
     </header>
   );
 }

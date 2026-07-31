@@ -254,6 +254,17 @@ export function useRankingReveal({
     }
   }, [hide, isRevealing, start]);
 
+  const toggleInstant = useCallback(() => {
+    if (revealedCount === itemCount && itemCount > 0) {
+      hide();
+    } else {
+      setIsPlaying(false);
+      setRevealedCount(itemCount);
+      targetScrollTopRef.current = 0; // Volver arriba si se muestra todo de golpe
+      lerpFactorRef.current = 0.12;
+    }
+  }, [hide, itemCount, revealedCount]);
+
   // ---------------------------------------------------------------------------
   // Reiniciar cuando cambia de ronda (resetKey)
   // ---------------------------------------------------------------------------
@@ -284,6 +295,12 @@ export function useRankingReveal({
         return;
       }
 
+      if (event.key.toLowerCase() === 'z') {
+        event.preventDefault();
+        toggleInstant();
+        return;
+      }
+
       if (event.key.toLowerCase() === 'r') {
         event.preventDefault();
         toggle();
@@ -292,7 +309,7 @@ export function useRankingReveal({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [active, toggle]);
+  }, [active, toggle, toggleInstant]);
 
   return {
     scrollContainerRef,
@@ -301,6 +318,7 @@ export function useRankingReveal({
     isPlaying,
     isRevealing,
     toggle,
+    toggleInstant,
     hide,
   };
 }

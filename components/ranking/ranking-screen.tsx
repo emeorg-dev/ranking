@@ -49,6 +49,7 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
           isRevealing={reveal.isRevealing}
           isPlaying={reveal.isPlaying}
           onToggleReveal={reveal.toggle}
+          onToggleInstant={reveal.toggleInstant}
         />
 
         <RoundSelector
