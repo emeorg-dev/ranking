@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { ConfirmationDialog } from '@/components/competition/confirmation-dialog';
+import { useLanguage } from '@/components/language/language-provider';
 import { CompetitionSettings } from '@/components/score-entry/competition-settings';
 import { ScoreEntryToolbar } from '@/components/score-entry/score-entry-toolbar';
 import { ScoreTable } from '@/components/score-entry/score-table';
@@ -38,6 +39,8 @@ export function ScoreEntryScreen({
   const [searchQuery, setSearchQuery] = useState('');
   const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
   const [roundToDelete, setRoundToDelete] = useState<Round | null>(null);
+  
+  const { t } = useLanguage();
 
   const orderedRounds = useMemo(() => sortRounds(data.rounds), [data.rounds]);
 
@@ -64,9 +67,7 @@ export function ScoreEntryScreen({
           onToggleShowName={onToggleShowName}
         />
         <p className="mt-1 text-sm text-muted-foreground">
-          Ingreso de puntajes · {data.teams.length} equipo
-          {data.teams.length !== 1 ? 's' : ''} · {orderedRounds.length} ronda
-          {orderedRounds.length !== 1 ? 's' : ''}
+          {t('ranking.scoreEntry.title')} · {data.teams.length} {data.teams.length !== 1 ? t('ranking.scoreEntry.teams') : t('ranking.scoreEntry.team')} · {orderedRounds.length} {orderedRounds.length !== 1 ? t('ranking.scoreEntry.rounds') : t('ranking.scoreEntry.round')}
         </p>
       </header>
 
@@ -94,9 +95,9 @@ export function ScoreEntryScreen({
       {/* Diálogo de confirmación: eliminar equipo */}
       <ConfirmationDialog
         open={teamToDelete !== null}
-        title="¿Eliminar equipo?"
-        description={`Se eliminará "${teamToDelete?.name}" y todos sus puntajes. Esta acción no se puede deshacer.`}
-        confirmLabel="Eliminar equipo"
+        title={t('ranking.dialogs.deleteTeamTitle')}
+        description={t('ranking.dialogs.deleteTeamDesc').replace('{0}', teamToDelete?.name ?? '')}
+        confirmLabel={t('ranking.dialogs.deleteTeamConfirm')}
         onConfirm={() => {
           if (teamToDelete) {
             onRemoveTeam(teamToDelete.id);
@@ -111,9 +112,9 @@ export function ScoreEntryScreen({
       {/* Diálogo de confirmación: eliminar ronda */}
       <ConfirmationDialog
         open={roundToDelete !== null}
-        title="¿Eliminar ronda?"
-        description={`Se eliminará "${roundToDelete?.name}" y todos los puntajes asociados a esta ronda. Esta acción no se puede deshacer.`}
-        confirmLabel="Eliminar ronda"
+        title={t('ranking.dialogs.deleteRoundTitle')}
+        description={t('ranking.dialogs.deleteRoundDesc').replace('{0}', roundToDelete?.name ?? '')}
+        confirmLabel={t('ranking.dialogs.deleteRoundConfirm')}
         onConfirm={() => {
           if (roundToDelete) {
             onRemoveRound(roundToDelete.id);

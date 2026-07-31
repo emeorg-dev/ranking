@@ -2,6 +2,9 @@
 
 import { RotateCcw } from 'lucide-react';
 
+import { useLanguage } from '@/components/language/language-provider';
+import { LanguageSelect } from '@/components/language/language-select';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,16 +16,17 @@ interface ScreenNavigationProps {
   onReset: () => void;
 }
 
-const TABS = [
-  { id: 'entry' as const, label: 'Puntajes' },
-  { id: 'ranking' as const, label: 'Ranking' },
-];
-
 export function ScreenNavigation({
   currentScreen,
   onScreenChange,
   onReset,
 }: ScreenNavigationProps) {
+  const { t } = useLanguage();
+
+  const TABS = [
+    { id: 'entry' as const, label: t('ranking.navigation.scores') },
+    { id: 'ranking' as const, label: t('ranking.navigation.ranking') },
+  ];
   return (
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -45,21 +49,28 @@ export function ScreenNavigation({
               <span className="opacity-50">/</span>
               <Kbd>]</Kbd>
             </KbdGroup>
-            <span>cambiar pantalla</span>
+            <span>{t('common.actions.changeScreen')}</span>
             <span className="mx-1 opacity-30">·</span>
             <Kbd>R</Kbd>
-            <span>mostrar ranking</span>
+            <span>{t('common.actions.showRanking')}</span>
           </p>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onReset}
-            className="gap-1.5 text-muted-foreground"
-          >
-            <RotateCcw className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Reiniciar</span>
-          </Button>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <LanguageSelect />
+            <ThemeToggle />
+            
+            <div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onReset}
+              className="gap-1.5 text-muted-foreground"
+            >
+              <RotateCcw className="size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">{t('common.actions.reset')}</span>
+            </Button>
+          </div>
         </div>
       </div>
     </header>

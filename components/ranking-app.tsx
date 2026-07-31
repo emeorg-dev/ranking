@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 
+import { useLanguage } from '@/components/language/language-provider';
 import { ScreenNavigation } from '@/components/navigation/screen-navigation';
 import { RankingScreen } from '@/components/ranking/ranking-screen';
 import { ScoreEntryScreen } from '@/components/score-entry/score-entry-screen';
@@ -17,6 +18,8 @@ export function RankingApp() {
   const [savedData, setSavedData, isHydrated] = useCompetitionStorage(getEmptyData());
   const competition = useCompetition(savedData, setSavedData);
 
+  const { t } = useLanguage();
+
   useShortcuts({
     onGoToEntry: () => setCurrentScreen('entry'),
     onGoToRanking: () => setCurrentScreen('ranking'),
@@ -29,7 +32,7 @@ export function RankingApp() {
   if (!isHydrated) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-muted-foreground">Cargando…</p>
+        <p className="text-muted-foreground">{t('common.status.loading')}</p>
       </div>
     );
   }

@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff, Zap } from 'lucide-react';
 
+import { useLanguage } from '@/components/language/language-provider';
 import { Button } from '@/components/ui/button';
 import { Kbd } from '@/components/ui/kbd';
 import type { RevealMode } from '@/hooks/ranking-reveal/reveal-reducer';
@@ -23,14 +24,15 @@ export function RankingHeader({
   onShowInstantly,
   onHide,
 }: RankingHeaderProps) {
+  const { t } = useLanguage();
   let statusText: string;
 
   if (revealMode === 'sequential') {
-    statusText = 'Revelando ranking…';
+    statusText = t('ranking.reveal.revealing');
   } else if (revealMode === 'instant') {
-    statusText = 'Ranking visible';
+    statusText = t('ranking.reveal.visible');
   } else {
-    statusText = 'Ranking oculto — mostrar cuando esté listo';
+    statusText = t('ranking.reveal.hidden');
   }
 
   return (
@@ -41,7 +43,7 @@ export function RankingHeader({
             {competitionName}
           </h1>
         )}
-        <h2 className="mt-0.5 text-base font-medium text-muted-foreground">Ranking</h2>
+        <h2 className="mt-0.5 text-base font-medium text-muted-foreground">{t('ranking.common.title')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{statusText}</p>
       </div>
 
@@ -55,7 +57,7 @@ export function RankingHeader({
               className="gap-2"
             >
               <Zap className="size-4" aria-hidden="true" />
-              Vista rápida
+              {t('ranking.reveal.instantView')}
               <Kbd>Z</Kbd>
             </Button>
 
@@ -66,7 +68,7 @@ export function RankingHeader({
               className="gap-2"
             >
               <Eye className="size-4" aria-hidden="true" />
-              Mostrar ranking
+              {t('ranking.reveal.show')}
               <Kbd>R</Kbd>
             </Button>
           </>
@@ -81,7 +83,7 @@ export function RankingHeader({
               className="gap-2"
             >
               <Zap className="size-4" aria-hidden="true" />
-              Mostrar todo
+              {t('ranking.reveal.showAll')}
               <Kbd>Z</Kbd>
             </Button>
 
@@ -92,7 +94,7 @@ export function RankingHeader({
               className="gap-2"
             >
               <EyeOff className="size-4" aria-hidden="true" />
-              Ocultar ranking
+              {t('ranking.reveal.hide')}
               <Kbd>R</Kbd>
             </Button>
           </>
@@ -106,7 +108,7 @@ export function RankingHeader({
             className="gap-2"
           >
             <EyeOff className="size-4" aria-hidden="true" />
-            Ocultar ranking
+            {t('ranking.reveal.hide')}
             <span className="flex items-center gap-1">
               <Kbd>Z</Kbd>
               <span className="opacity-50">/</span>

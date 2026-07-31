@@ -2,6 +2,7 @@
 
 import { Plus, Search } from 'lucide-react';
 
+import { useLanguage } from '@/components/language/language-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -22,6 +23,8 @@ export function ScoreEntryToolbar({
   onAddTeam,
   onAddRound,
 }: ScoreEntryToolbarProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="mb-6 flex flex-wrap justify-between gap-2">
       {/* Búsqueda */}
@@ -32,7 +35,7 @@ export function ScoreEntryToolbar({
             aria-hidden="true"
           />
           <Input
-            placeholder="Buscar equipo..."
+            placeholder={t('ranking.scoreEntry.searchTeams')}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="h-9 w-full pl-9"
@@ -43,7 +46,7 @@ export function ScoreEntryToolbar({
       {/* Agregar equipo y ronda */}
       <div className="flex min-w-[200px] flex-1 justify-end gap-2">
         <Input
-          placeholder="Agregar equipo…"
+          placeholder={t('ranking.scoreEntry.addTeamPlaceholder')}
           value={newTeamName}
           onChange={(e) => onNewTeamNameChange(e.target.value)}
           onKeyDown={(e) => {
@@ -56,13 +59,13 @@ export function ScoreEntryToolbar({
         />
         <Button onClick={onAddTeam} size="sm" className="h-9 shrink-0 gap-1.5">
           <Plus className="size-4" aria-hidden="true" />
-          <span className="hidden sm:inline">Agregar equipo</span>
+          <span className="hidden sm:inline">{t('ranking.scoreEntry.addTeam')}</span>
         </Button>
       </div>
 
       <Button onClick={onAddRound} size="sm" variant="outline" className="h-9 gap-1.5">
         <Plus className="size-4" aria-hidden="true" />
-        <span>Agregar ronda</span>
+        <span>{t('ranking.scoreEntry.addRound')}</span>
       </Button>
     </div>
   );
