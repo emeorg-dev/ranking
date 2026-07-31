@@ -20,7 +20,6 @@ interface ScoreEntryScreenProps {
   onUpdateCompetitionName: (name: string) => void;
   onToggleShowName: (checked: boolean) => void;
   onUpdateTeamName: (teamId: string, name: string) => void;
-  onUpdateRoundName: (roundId: string, name: string) => void;
 }
 
 export function ScoreEntryScreen({
@@ -33,7 +32,6 @@ export function ScoreEntryScreen({
   onUpdateCompetitionName,
   onToggleShowName,
   onUpdateTeamName,
-  onUpdateRoundName,
 }: ScoreEntryScreenProps) {
   const [newTeamName, setNewTeamName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,8 +85,7 @@ export function ScoreEntryScreen({
         scores={data.scores}
         onSetScore={onSetScore}
         onUpdateTeamName={onUpdateTeamName}
-        onUpdateRoundName={onUpdateRoundName}
-        onRequestDeleteTeam={setTeamToDelete}
+        onRequestDeleteTeam={(team) => setTeamToDelete(team)}
         onRequestDeleteRound={setRoundToDelete}
       />
 

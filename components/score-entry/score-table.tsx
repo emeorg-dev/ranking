@@ -5,7 +5,6 @@ import { X } from 'lucide-react';
 
 import { useLanguage } from '@/components/language/language-provider';
 import { ScoreTeamRow } from '@/components/score-entry/score-team-row';
-import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -24,7 +23,6 @@ interface ScoreTableProps {
   scores: Score[];
   onSetScore: (teamId: string, roundId: string, value: number | null) => void;
   onUpdateTeamName: (teamId: string, name: string) => void;
-  onUpdateRoundName: (roundId: string, name: string) => void;
   onRequestDeleteTeam: (team: Team) => void;
   onRequestDeleteRound: (round: Round) => void;
 }
@@ -36,7 +34,6 @@ export function ScoreTable({
   scores,
   onSetScore,
   onUpdateTeamName,
-  onUpdateRoundName,
   onRequestDeleteTeam,
   onRequestDeleteRound,
 }: ScoreTableProps) {
@@ -46,11 +43,6 @@ export function ScoreTable({
 
   useScoreTableScroll(scrollContainerRef, rounds.length);
 
-  const handleRoundNameBlur = (roundId: string, currentName: string) => {
-    const trimmed = currentName.trim();
-    onUpdateRoundName(roundId, trimmed || t('ranking.table.unnamedRound'));
-  };
-
   return (
     <div ref={scrollContainerRef} className="overflow-x-auto rounded-xl border">
       <Table>
@@ -59,16 +51,15 @@ export function ScoreTable({
             <TableHead className="sticky left-0 z-10 min-w-36 bg-muted/40 px-4 text-left">
               {t('ranking.table.team')}
             </TableHead>
-            {rounds.map((round) => (
+            {rounds.map((round, index) => (
               <TableHead key={round.id} className="group relative min-w-28 px-3 text-center">
                 <div className="flex items-center justify-center gap-1">
-                  <Input
-                    value={round.name}
-                    onChange={(e) => onUpdateRoundName(round.id, e.target.value)}
-                    onBlur={(e) => handleRoundNameBlur(round.id, e.target.value)}
-                    className="h-6 w-20 min-w-0 border-transparent bg-transparent px-1 text-center text-xs font-medium uppercase tracking-wide shadow-none hover:border-input focus-visible:border-input"
-                    aria-label={`Nombre de ${round.name}`}
-                  />
+                  <span
+                    className="h-6 min-w-0 border-transparent bg-transparent px-1 text-center text-xs font-medium uppercase tracking-wide flex items-center justify-center"
+                    aria-label={t('ranking.table.roundName').replace('{0}', (index + 1).toString())}
+                  >
+                    {t('ranking.table.roundName').replace('{0}', (index + 1).toString())}
+                  </span>
                   <button
                     onClick={() => onRequestDeleteRound(round)}
                     className="shrink-0 text-destructive opacity-0 transition-opacity group-hover:opacity-100"

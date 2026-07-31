@@ -58,6 +58,7 @@ export const es = {
     table: {
       team: "Equipo",
       total: "Total",
+      roundName: "Ronda {0}",
       unnamedRound: "Ronda sin nombre",
       deleteTeam: "Eliminar equipo",
       deleteRound: "Eliminar ronda",

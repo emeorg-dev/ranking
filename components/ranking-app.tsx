@@ -72,7 +72,6 @@ export function RankingApp() {
                 onUpdateCompetitionName={competition.updateCompetitionName}
                 onToggleShowName={competition.toggleShowName}
                 onUpdateTeamName={competition.updateTeamName}
-                onUpdateRoundName={competition.updateRoundName}
               />
             </ScrollArea>
           </section>

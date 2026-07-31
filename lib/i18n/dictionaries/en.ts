@@ -60,6 +60,7 @@ export const en = {
     table: {
       team: "Team",
       total: "Total",
+      roundName: "Round {0}",
       unnamedRound: "Unnamed round",
       deleteTeam: "Delete team",
       deleteRound: "Delete round",
