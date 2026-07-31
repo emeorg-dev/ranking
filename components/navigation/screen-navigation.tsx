@@ -3,6 +3,7 @@
 import { RotateCcw } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { cn } from '@/lib/utils';
 
 interface ScreenNavigationProps {
@@ -12,8 +13,8 @@ interface ScreenNavigationProps {
 }
 
 const TABS = [
-  { id: 'entry' as const, label: 'Scores' },
-  { id: 'ranking' as const, label: 'Rankings' },
+  { id: 'entry' as const, label: 'Puntajes' },
+  { id: 'ranking' as const, label: 'Ranking' },
 ];
 
 export function ScreenNavigation({
@@ -25,10 +26,7 @@ export function ScreenNavigation({
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         {/* Segmented tabs */}
-        <nav
-          aria-label="Screens"
-          className="flex items-center gap-1 rounded-lg bg-muted/60 p-1"
-        >
+        <nav aria-label="Pantallas" className="flex items-center gap-1 rounded-lg bg-muted/60 p-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -48,22 +46,17 @@ export function ScreenNavigation({
         </nav>
 
         <div className="flex items-center gap-3">
-          <p className="hidden items-center gap-1 text-xs text-muted-foreground lg:flex">
-            <kbd className="rounded border bg-muted px-1.5 py-0.5 font-medium">
-              Ctrl
-            </kbd>
-            <kbd className="rounded border bg-muted px-1.5 py-0.5 font-medium">
-              [
-            </kbd>
-            <span className="mx-0.5">/</span>
-            <kbd className="rounded border bg-muted px-1.5 py-0.5 font-medium">
-              ]
-            </kbd>
-            <span className="ml-1">switch</span>
-            <kbd className="ml-2 rounded border bg-muted px-1.5 py-0.5 font-medium">
-              R
-            </kbd>
-            <span className="ml-1">reveal</span>
+          <p className="hidden items-center gap-1.5 text-xs text-muted-foreground lg:flex">
+            <KbdGroup>
+              <Kbd>Ctrl</Kbd>
+              <Kbd>[</Kbd>
+              <span className="opacity-50">/</span>
+              <Kbd>]</Kbd>
+            </KbdGroup>
+            <span>cambiar pantalla</span>
+            <span className="mx-1 opacity-30">·</span>
+            <Kbd>R</Kbd>
+            <span>mostrar ranking</span>
           </p>
 
           <Button
@@ -73,7 +66,7 @@ export function ScreenNavigation({
             className="gap-1.5 text-muted-foreground"
           >
             <RotateCcw className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden sm:inline">Reiniciar</span>
           </Button>
         </div>
       </div>

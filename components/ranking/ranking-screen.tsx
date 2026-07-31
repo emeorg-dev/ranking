@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo,useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { assignRanks,calculateRanking } from '@/lib/competition/ranking';
+import { Kbd } from '@/components/ui/kbd';
+import { assignRanks, calculateRanking } from '@/lib/competition/ranking';
 import { sortRounds } from '@/lib/competition/rounds';
 import type { CompetitionData } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -104,9 +105,7 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
             <Eye className="size-4" aria-hidden="true" />
           )}
           {revealed ? 'Ocultar ranking' : 'Mostrar ranking'}
-          <kbd className="ml-1 hidden rounded border border-current/20 px-1.5 py-0.5 text-[10px] font-medium opacity-70 sm:inline">
-            R
-          </kbd>
+          <Kbd>R</Kbd>
         </Button>
       </header>
 
@@ -125,7 +124,7 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
               className={cn(
                 'h-7 min-w-9 px-2 text-xs tabular-nums',
                 selectedRoundIndex === index &&
-                  'bg-foreground text-background hover:bg-foreground/90 hover:text-background'
+                'bg-foreground text-background hover:bg-foreground/90 hover:text-background'
               )}
             >
               {round.name}
