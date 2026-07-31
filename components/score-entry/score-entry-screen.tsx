@@ -8,6 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { sortRounds } from '@/lib/competition/rounds';
 import { createScoreMap, getScoreValue } from '@/lib/competition/scores';
 import type { CompetitionData, Round, Team } from '@/lib/types';
@@ -173,20 +181,18 @@ export function ScoreEntryScreen({
 
       {/* Tabla de puntajes */}
       <div ref={scrollContainerRef} className="overflow-x-auto rounded-xl border">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b bg-muted/40">
-              <th
-                scope="col"
-                className="sticky left-0 z-10 min-w-36 bg-muted/40 px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground backdrop-blur"
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead
+                className="sticky left-0 z-10 min-w-36 bg-muted/40 px-4 text-left"
               >
                 Equipo
-              </th>
+              </TableHead>
               {orderedRounds.map((round) => (
-                <th
+                <TableHead
                   key={round.id}
-                  scope="col"
-                  className="min-w-28 px-3 py-2 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground tabular-nums group relative"
+                  className="min-w-28 px-3 text-center group relative"
                 >
                   <div className="flex items-center justify-center gap-1">
                     <Input
@@ -204,27 +210,25 @@ export function ScoreEntryScreen({
                       <X className="size-3" />
                     </button>
                   </div>
-                </th>
+                </TableHead>
               ))}
-              <th
-                scope="col"
-                className="min-w-20 px-3 py-2.5 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground"
+              <TableHead
+                className="min-w-20 px-3 text-center"
               >
                 Total
-              </th>
-              <th scope="col" className="w-12 px-2 py-2.5">
+              </TableHead>
+              <TableHead className="w-12 px-2">
                 <span className="sr-only">Eliminar equipo</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredTeams.map((team) => {
               let total = 0;
 
               return (
-                <tr key={team.id} className="border-b last:border-0 hover:bg-muted/30">
-                  <th
-                    scope="row"
+                <TableRow key={team.id} className="hover:bg-muted/30">
+                  <TableCell
                     className="sticky left-0 z-10 min-w-36 bg-card px-3 py-2 text-left font-medium"
                   >
                     <Input
@@ -234,13 +238,13 @@ export function ScoreEntryScreen({
                       className="h-7 border-transparent bg-transparent px-1 font-medium shadow-none hover:border-input focus-visible:border-input truncate"
                       aria-label={`Nombre del equipo ${team.name}`}
                     />
-                  </th>
+                  </TableCell>
                   {orderedRounds.map((round) => {
                     const score = getScoreValue(scoreMap, team.id, round.id);
                     total += score ?? 0;
 
                     return (
-                      <td key={round.id} className="min-w-24 px-2 py-2">
+                      <TableCell key={round.id} className="min-w-24 px-2 py-2">
                         <Input
                           type="number"
                           min="0"
@@ -253,13 +257,13 @@ export function ScoreEntryScreen({
                           }
                           className="h-8 border-transparent bg-transparent text-center tabular-nums shadow-none hover:border-input focus-visible:border-input"
                         />
-                      </td>
+                      </TableCell>
                     );
                   })}
-                  <td className="min-w-20 px-3 py-2 text-center font-semibold tabular-nums">
+                  <TableCell className="min-w-20 px-3 py-2 text-center font-semibold tabular-nums">
                     {total}
-                  </td>
-                  <td className="px-2 py-2 text-center">
+                  </TableCell>
+                  <TableCell className="px-2 py-2 text-center">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -269,12 +273,12 @@ export function ScoreEntryScreen({
                       <X className="size-4" aria-hidden="true" />
                       <span className="sr-only">Eliminar {team.name}</span>
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
 
         {data.teams.length === 0 ? (
           <p className="p-8 text-center text-sm text-muted-foreground">
