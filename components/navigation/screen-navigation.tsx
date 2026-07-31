@@ -3,8 +3,6 @@
 import { RotateCcw } from 'lucide-react';
 
 import { useLanguage } from '@/components/language/language-provider';
-import { LanguageSelect } from '@/components/language/language-select';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -56,11 +54,6 @@ export function ScreenNavigation({
           </p>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            <LanguageSelect />
-            <ThemeToggle />
-            
-            <div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
-            
             <Button
               variant="ghost"
               size="sm"
