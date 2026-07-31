@@ -4,31 +4,30 @@ import { Eye, EyeOff, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Kbd } from '@/components/ui/kbd';
+import type { RevealMode } from '@/hooks/ranking-reveal/reveal-reducer';
 
 interface RankingHeaderProps {
   competitionName: string;
   showName: boolean;
-  /** true cuando el ranking está parcial o totalmente revelado (o en curso). */
-  isRevealing: boolean;
-  /** true solo mientras la secuencia de revelación avanza automáticamente. */
-  isPlaying: boolean;
-  onToggleReveal: () => void;
-  onToggleInstant: () => void;
+  revealMode: RevealMode;
+  onStartReveal: () => void;
+  onShowInstantly: () => void;
+  onHide: () => void;
 }
 
 export function RankingHeader({
   competitionName,
   showName,
-  isRevealing,
-  isPlaying,
-  onToggleReveal,
-  onToggleInstant,
+  revealMode,
+  onStartReveal,
+  onShowInstantly,
+  onHide,
 }: RankingHeaderProps) {
   let statusText: string;
 
-  if (isPlaying) {
+  if (revealMode === 'sequential') {
     statusText = 'Revelando ranking…';
-  } else if (isRevealing) {
+  } else if (revealMode === 'instant') {
     statusText = 'Ranking visible';
   } else {
     statusText = 'Ranking oculto — mostrar cuando esté listo';
@@ -47,31 +46,74 @@ export function RankingHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleInstant}
-          className="gap-2"
-        >
-          <Zap className="size-4" aria-hidden="true" />
-          Vista rápida
-          <Kbd>Z</Kbd>
-        </Button>
+        {revealMode === 'hidden' && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShowInstantly}
+              className="gap-2"
+            >
+              <Zap className="size-4" aria-hidden="true" />
+              Vista rápida
+              <Kbd>Z</Kbd>
+            </Button>
 
-        <Button
-          variant={isRevealing ? 'outline' : 'default'}
-          size="sm"
-          onClick={onToggleReveal}
-          className="gap-2"
-        >
-          {isRevealing ? (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onStartReveal}
+              className="gap-2"
+            >
+              <Eye className="size-4" aria-hidden="true" />
+              Mostrar ranking
+              <Kbd>R</Kbd>
+            </Button>
+          </>
+        )}
+
+        {revealMode === 'sequential' && (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShowInstantly}
+              className="gap-2"
+            >
+              <Zap className="size-4" aria-hidden="true" />
+              Mostrar todo
+              <Kbd>Z</Kbd>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onHide}
+              className="gap-2"
+            >
+              <EyeOff className="size-4" aria-hidden="true" />
+              Ocultar ranking
+              <Kbd>R</Kbd>
+            </Button>
+          </>
+        )}
+
+        {revealMode === 'instant' && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onHide}
+            className="gap-2"
+          >
             <EyeOff className="size-4" aria-hidden="true" />
-          ) : (
-            <Eye className="size-4" aria-hidden="true" />
-          )}
-          {isRevealing ? 'Ocultar ranking' : 'Mostrar ranking'}
-          <Kbd>R</Kbd>
-        </Button>
+            Ocultar ranking
+            <span className="flex items-center gap-1">
+              <Kbd>Z</Kbd>
+              <span className="opacity-50">/</span>
+              <Kbd>R</Kbd>
+            </span>
+          </Button>
+        )}
       </div>
     </header>
   );

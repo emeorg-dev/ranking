@@ -6,7 +6,7 @@ import { RankingHeader } from '@/components/ranking/ranking-header';
 import { RankingList } from '@/components/ranking/ranking-list';
 import { RoundSelector } from '@/components/ranking/round-selector';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useRankingReveal } from '@/hooks/use-ranking-reveal';
+import { useRankingReveal } from '@/hooks/ranking-reveal/use-ranking-reveal';
 import { useRankingRound } from '@/hooks/use-ranking-round';
 import { assignRanks, calculateRanking } from '@/lib/competition/ranking';
 import type { CompetitionData } from '@/lib/types';
@@ -46,10 +46,10 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
         <RankingHeader
           competitionName={data.name}
           showName={data.showName !== false}
-          isRevealing={reveal.isRevealing}
-          isPlaying={reveal.isPlaying}
-          onToggleReveal={reveal.toggle}
-          onToggleInstant={reveal.toggleInstant}
+          revealMode={reveal.mode}
+          onStartReveal={reveal.startSequentialReveal}
+          onShowInstantly={reveal.showInstantly}
+          onHide={reveal.hideRanking}
         />
 
         <RoundSelector
