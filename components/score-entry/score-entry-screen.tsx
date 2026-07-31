@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo,useRef, useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 
 import { ConfirmationDialog } from '@/components/competition/confirmation-dialog';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,7 @@ export function ScoreEntryScreen({
   onUpdateRoundName,
 }: ScoreEntryScreenProps) {
   const [newTeamName, setNewTeamName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
   const [roundToDelete, setRoundToDelete] = useState<Round | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -41,6 +42,12 @@ export function ScoreEntryScreen({
   const orderedRounds = useMemo(() => sortRounds(data.rounds), [data.rounds]);
   const scoreMap = useMemo(() => createScoreMap(data.scores), [data.scores]);
   const roundsCount = orderedRounds.length;
+
+  const filteredTeams = useMemo(() => {
+    if (!searchQuery.trim()) return data.teams;
+    const query = searchQuery.toLowerCase();
+    return data.teams.filter((team) => team.name.toLowerCase().includes(query));
+  }, [data.teams, searchQuery]);
 
   // Keep the newest rounds in view
   useEffect(() => {
@@ -106,7 +113,19 @@ export function ScoreEntryScreen({
 
       {/* Acciones */}
       <div className="mb-6 flex flex-wrap gap-2 justify-between">
-        <div className="flex gap-2 flex-1 min-w-[200px]">
+        <div className="flex gap-2 flex-1 min-w-[200px] max-w-sm">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              placeholder="Buscar equipo..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 pl-9 w-full"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-2 flex-1 min-w-[200px] justify-end">
           <Input
             placeholder="Agregar equipo…"
             value={newTeamName}
@@ -119,7 +138,7 @@ export function ScoreEntryScreen({
             }}
             className="h-9 flex-1"
           />
-          <Button onClick={handleAddTeam} size="sm" className="h-9 gap-1.5">
+          <Button onClick={handleAddTeam} size="sm" className="h-9 gap-1.5 shrink-0">
             <Plus className="size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Agregar equipo</span>
           </Button>
@@ -178,7 +197,7 @@ export function ScoreEntryScreen({
             </tr>
           </thead>
           <tbody>
-            {data.teams.map((team) => {
+            {filteredTeams.map((team) => {
               let total = 0;
 
               return (
@@ -236,11 +255,15 @@ export function ScoreEntryScreen({
           </tbody>
         </table>
 
-        {data.teams.length === 0 && (
+        {data.teams.length === 0 ? (
           <p className="p-8 text-center text-sm text-muted-foreground">
             Todavía no hay equipos. Agrega el primer equipo para comenzar.
           </p>
-        )}
+        ) : filteredTeams.length === 0 ? (
+          <p className="p-8 text-center text-sm text-muted-foreground">
+            No se encontraron equipos que coincidan con la búsqueda.
+          </p>
+        ) : null}
       </div>
 
       {/* Diálogo de confirmación: eliminar equipo */}
