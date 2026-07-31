@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { ScreenNavigation } from '@/components/navigation/screen-navigation';
 import { RankingScreen } from '@/components/ranking/ranking-screen';
 import { ScoreEntryScreen } from '@/components/score-entry/score-entry-screen';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCompetition } from '@/hooks/use-competition';
 import { useCompetitionStorage } from '@/hooks/use-local-storage';
 import { useShortcuts } from '@/hooks/use-shortcuts';
@@ -51,24 +52,26 @@ export function RankingApp() {
         >
           {/* Pantalla de ingreso de puntajes */}
           <section
-            className="h-full w-full shrink-0 overflow-y-auto"
+            className="h-full w-full shrink-0"
             aria-hidden={currentScreen !== 'entry'}
             {...(currentScreen !== 'entry' ? { inert: true } : {})}
           >
-            <ScoreEntryScreen
-              data={competition.data}
-              onSetScore={competition.setScore}
-              onAddTeam={competition.addTeam}
-              onRemoveTeam={competition.removeTeam}
-              onAddRound={() =>
-                competition.addRound(`Ronda ${competition.data.rounds.length + 1}`)
-              }
-              onRemoveRound={competition.removeRound}
-              onUpdateCompetitionName={competition.updateCompetitionName}
-              onToggleShowName={competition.toggleShowName}
-              onUpdateTeamName={competition.updateTeamName}
-              onUpdateRoundName={competition.updateRoundName}
-            />
+            <ScrollArea className="h-full">
+              <ScoreEntryScreen
+                data={competition.data}
+                onSetScore={competition.setScore}
+                onAddTeam={competition.addTeam}
+                onRemoveTeam={competition.removeTeam}
+                onAddRound={() =>
+                  competition.addRound(`Ronda ${competition.data.rounds.length + 1}`)
+                }
+                onRemoveRound={competition.removeRound}
+                onUpdateCompetitionName={competition.updateCompetitionName}
+                onToggleShowName={competition.toggleShowName}
+                onUpdateTeamName={competition.updateTeamName}
+                onUpdateRoundName={competition.updateRoundName}
+              />
+            </ScrollArea>
           </section>
 
           {/* Pantalla de ranking — el scroll lo gestiona RankingScreen internamente */}
