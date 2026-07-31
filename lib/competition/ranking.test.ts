@@ -14,7 +14,7 @@ function makeData(
   rounds: { id: string; name: string; order: number }[],
   scores: { teamId: string; roundId: string; value: number | null }[]
 ): CompetitionData {
-  return { name: 'Test', teams, rounds, scores };
+  return { name: 'Test', showName: true, teams, rounds, scores };
 }
 
 // ---------------------------------------------------------------------------

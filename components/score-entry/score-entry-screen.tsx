@@ -1,23 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, Search, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { ConfirmationDialog } from '@/components/competition/confirmation-dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { CompetitionSettings } from '@/components/score-entry/competition-settings';
+import { ScoreEntryToolbar } from '@/components/score-entry/score-entry-toolbar';
+import { ScoreTable } from '@/components/score-entry/score-table';
 import { sortRounds } from '@/lib/competition/rounds';
-import { createScoreMap, getScoreValue } from '@/lib/competition/scores';
 import type { CompetitionData, Round, Team } from '@/lib/types';
 
 interface ScoreEntryScreenProps {
@@ -49,32 +38,14 @@ export function ScoreEntryScreen({
   const [searchQuery, setSearchQuery] = useState('');
   const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
   const [roundToDelete, setRoundToDelete] = useState<Round | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const orderedRounds = useMemo(() => sortRounds(data.rounds), [data.rounds]);
-  const scoreMap = useMemo(() => createScoreMap(data.scores), [data.scores]);
-  const roundsCount = orderedRounds.length;
 
   const filteredTeams = useMemo(() => {
     if (!searchQuery.trim()) return data.teams;
     const query = searchQuery.toLowerCase();
     return data.teams.filter((team) => team.name.toLowerCase().includes(query));
   }, [data.teams, searchQuery]);
-
-  // Keep the newest rounds in view
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container || roundsCount <= 5) return;
-
-    const id = window.setTimeout(() => {
-      container.scrollTo({
-        left: container.scrollWidth - container.clientWidth,
-        behavior: 'smooth',
-      });
-    }, 80);
-
-    return () => window.clearTimeout(id);
-  }, [roundsCount]);
 
   const handleAddTeam = () => {
     if (newTeamName.trim()) {
@@ -83,213 +54,42 @@ export function ScoreEntryScreen({
     }
   };
 
-  const handleScoreChange = (teamId: string, roundId: string, value: string) => {
-    if (value === '') {
-      onSetScore(teamId, roundId, null);
-      return;
-    }
-
-    const parsedValue = Number(value);
-
-    if (!Number.isFinite(parsedValue)) {
-      return;
-    }
-
-    onSetScore(teamId, roundId, Math.max(0, parsedValue));
-  };
-
-  const handleTeamNameBlur = (teamId: string, currentName: string) => {
-    const trimmed = currentName.trim();
-    onUpdateTeamName(teamId, trimmed || 'Equipo sin nombre');
-  };
-
-  const handleRoundNameBlur = (roundId: string, currentName: string) => {
-    const trimmed = currentName.trim();
-    onUpdateRoundName(roundId, trimmed || 'Ronda sin nombre');
-  };
-
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-8">
-        <div className="mb-4 max-w-2xl">
-          <div className="flex items-center justify-between mb-3">
-            <Label htmlFor="competition-name" className="text-sm font-semibold">Nombre de la competencia</Label>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="show-name" className="text-xs text-muted-foreground cursor-pointer">
-                Mostrar nombre
-              </Label>
-              <Switch
-                id="show-name"
-                checked={data.showName !== false}
-                onCheckedChange={onToggleShowName}
-              />
-            </div>
-          </div>
-          <Input
-            id="competition-name"
-            value={data.name}
-            onChange={(e) => onUpdateCompetitionName(e.target.value)}
-            disabled={data.showName === false}
-            className="h-auto px-3 py-2 text-lg font-medium shadow-none sm:text-xl"
-            aria-label="Nombre de la competencia"
-          />
-        </div>
+        <CompetitionSettings
+          name={data.name}
+          showName={data.showName !== false}
+          onUpdateName={onUpdateCompetitionName}
+          onToggleShowName={onToggleShowName}
+        />
         <p className="mt-1 text-sm text-muted-foreground">
-          Ingreso de puntajes · {data.teams.length} equipo{data.teams.length !== 1 ? 's' : ''} ·{' '}
-          {roundsCount} ronda{roundsCount !== 1 ? 's' : ''}
+          Ingreso de puntajes · {data.teams.length} equipo
+          {data.teams.length !== 1 ? 's' : ''} · {orderedRounds.length} ronda
+          {orderedRounds.length !== 1 ? 's' : ''}
         </p>
       </header>
 
-      {/* Acciones */}
-      <div className="mb-6 flex flex-wrap gap-2 justify-between">
-        <div className="flex gap-2 flex-1 min-w-[200px] max-w-sm">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              placeholder="Buscar equipo..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 w-full"
-            />
-          </div>
-        </div>
+      <ScoreEntryToolbar
+        searchQuery={searchQuery}
+        newTeamName={newTeamName}
+        onSearchChange={setSearchQuery}
+        onNewTeamNameChange={setNewTeamName}
+        onAddTeam={handleAddTeam}
+        onAddRound={onAddRound}
+      />
 
-        <div className="flex gap-2 flex-1 min-w-[200px] justify-end">
-          <Input
-            placeholder="Agregar equipo…"
-            value={newTeamName}
-            onChange={(e) => setNewTeamName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                e.preventDefault();
-                handleAddTeam();
-              }
-            }}
-            className="h-9 flex-1"
-          />
-          <Button onClick={handleAddTeam} size="sm" className="h-9 gap-1.5 shrink-0">
-            <Plus className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Agregar equipo</span>
-          </Button>
-        </div>
-
-        <Button onClick={onAddRound} size="sm" variant="outline" className="h-9 gap-1.5">
-          <Plus className="size-4" aria-hidden="true" />
-          <span>Agregar ronda</span>
-        </Button>
-      </div>
-
-      {/* Tabla de puntajes */}
-      <div ref={scrollContainerRef} className="overflow-x-auto rounded-xl border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead
-                className="sticky left-0 z-10 min-w-36 bg-muted/40 px-4 text-left"
-              >
-                Equipo
-              </TableHead>
-              {orderedRounds.map((round) => (
-                <TableHead
-                  key={round.id}
-                  className="min-w-28 px-3 text-center group relative"
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    <Input
-                      value={round.name}
-                      onChange={(e) => onUpdateRoundName(round.id, e.target.value)}
-                      onBlur={(e) => handleRoundNameBlur(round.id, e.target.value)}
-                      className="h-6 min-w-0 w-20 border-transparent bg-transparent px-1 text-center text-xs font-medium uppercase tracking-wide shadow-none hover:border-input focus-visible:border-input"
-                      aria-label={`Nombre de ${round.name}`}
-                    />
-                    <button
-                      onClick={() => setRoundToDelete(round)}
-                      className="shrink-0 opacity-0 group-hover:opacity-100 text-destructive transition-opacity"
-                      title="Eliminar ronda"
-                    >
-                      <X className="size-3" />
-                    </button>
-                  </div>
-                </TableHead>
-              ))}
-              <TableHead
-                className="min-w-20 px-3 text-center"
-              >
-                Total
-              </TableHead>
-              <TableHead className="w-12 px-2">
-                <span className="sr-only">Eliminar equipo</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredTeams.map((team) => {
-              let total = 0;
-
-              return (
-                <TableRow key={team.id} className="hover:bg-muted/30">
-                  <TableCell
-                    className="sticky left-0 z-10 min-w-36 bg-card px-3 py-2 text-left font-medium"
-                  >
-                    <Input
-                      value={team.name}
-                      onChange={(e) => onUpdateTeamName(team.id, e.target.value)}
-                      onBlur={(e) => handleTeamNameBlur(team.id, e.target.value)}
-                      className="h-7 border-transparent bg-transparent px-1 font-medium shadow-none hover:border-input focus-visible:border-input truncate"
-                      aria-label={`Nombre del equipo ${team.name}`}
-                    />
-                  </TableCell>
-                  {orderedRounds.map((round) => {
-                    const score = getScoreValue(scoreMap, team.id, round.id);
-                    total += score ?? 0;
-
-                    return (
-                      <TableCell key={round.id} className="min-w-24 px-2 py-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          step="any"
-                          inputMode="decimal"
-                          aria-label={`${team.name} ${round.name} puntaje`}
-                          value={score ?? ''}
-                          onChange={(e) =>
-                            handleScoreChange(team.id, round.id, e.target.value)
-                          }
-                          className="h-8 border-transparent bg-transparent text-center tabular-nums shadow-none hover:border-input focus-visible:border-input"
-                        />
-                      </TableCell>
-                    );
-                  })}
-                  <TableCell className="min-w-20 px-3 py-2 text-center font-semibold tabular-nums">
-                    {total}
-                  </TableCell>
-                  <TableCell className="px-2 py-2 text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => setTeamToDelete(team)}
-                    >
-                      <X className="size-4" aria-hidden="true" />
-                      <span className="sr-only">Eliminar {team.name}</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-
-        {data.teams.length === 0 ? (
-          <p className="p-8 text-center text-sm text-muted-foreground">
-            Todavía no hay equipos. Agrega el primer equipo para comenzar.
-          </p>
-        ) : filteredTeams.length === 0 ? (
-          <p className="p-8 text-center text-sm text-muted-foreground">
-            No se encontraron equipos que coincidan con la búsqueda.
-          </p>
-        ) : null}
-      </div>
+      <ScoreTable
+        teams={data.teams}
+        filteredTeams={filteredTeams}
+        rounds={orderedRounds}
+        scores={data.scores}
+        onSetScore={onSetScore}
+        onUpdateTeamName={onUpdateTeamName}
+        onUpdateRoundName={onUpdateRoundName}
+        onRequestDeleteTeam={setTeamToDelete}
+        onRequestDeleteRound={setRoundToDelete}
+      />
 
       {/* Diálogo de confirmación: eliminar equipo */}
       <ConfirmationDialog
@@ -324,6 +124,6 @@ export function ScoreEntryScreen({
           if (!open) setRoundToDelete(null);
         }}
       />
-    </div>
+    </main>
   );
 }

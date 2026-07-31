@@ -64,6 +64,7 @@ function removeRound(prev: CompetitionData, roundId: string): CompetitionData {
 
 const BASE: CompetitionData = {
   name: 'Test',
+  showName: true,
   teams: [
     { id: 't1', name: 'A', order: 1 },
     { id: 't2', name: 'B', order: 2 },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback,useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { ScreenNavigation } from '@/components/navigation/screen-navigation';
 import { RankingScreen } from '@/components/ranking/ranking-screen';
@@ -9,13 +9,13 @@ import { useCompetition } from '@/hooks/use-competition';
 import { useCompetitionStorage } from '@/hooks/use-local-storage';
 import { useShortcuts } from '@/hooks/use-shortcuts';
 import { getEmptyData } from '@/lib/competition/default-data';
+import type { AppScreen } from '@/lib/navigation/types';
 
 export function RankingApp() {
-  const [currentScreen, setCurrentScreen] = useState<'entry' | 'ranking'>('entry');
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>('entry');
   const [savedData, setSavedData, isHydrated] = useCompetitionStorage(getEmptyData());
   const competition = useCompetition(savedData, setSavedData);
 
-  // Handle keyboard shortcuts
   useShortcuts({
     onGoToEntry: () => setCurrentScreen('entry'),
     onGoToRanking: () => setCurrentScreen('ranking'),
@@ -27,30 +27,34 @@ export function RankingApp() {
 
   if (!isHydrated) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <p className="text-muted-foreground">Cargando…</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex h-screen flex-col bg-background">
       <ScreenNavigation
         currentScreen={currentScreen}
         onScreenChange={setCurrentScreen}
         onReset={handleReset}
       />
 
-      <div className="relative flex-1 overflow-y-auto overflow-x-hidden">
-        {/* Sliding container */}
+      {/* Contenedor con scroll independiente por pantalla */}
+      <div className="relative min-h-0 flex-1 overflow-hidden">
         <div
-          className="flex items-start transition-transform duration-500 ease-out"
+          className="flex h-full will-change-transform transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
           style={{
-            transform: `translateX(${currentScreen === 'entry' ? '0' : '-100%'})`,
+            transform: currentScreen === 'entry' ? 'translateX(0)' : 'translateX(-100%)',
           }}
         >
           {/* Pantalla de ingreso de puntajes */}
-          <div className="w-full flex-shrink-0" aria-hidden={currentScreen !== 'entry'}>
+          <section
+            className="h-full w-full shrink-0 overflow-y-auto"
+            aria-hidden={currentScreen !== 'entry'}
+            {...(currentScreen !== 'entry' ? { inert: true } : {})}
+          >
             <ScoreEntryScreen
               data={competition.data}
               onSetScore={competition.setScore}
@@ -65,15 +69,16 @@ export function RankingApp() {
               onUpdateTeamName={competition.updateTeamName}
               onUpdateRoundName={competition.updateRoundName}
             />
-          </div>
+          </section>
 
           {/* Pantalla de ranking */}
-          <div
-            className="w-full flex-shrink-0"
+          <section
+            className="h-full w-full shrink-0 overflow-y-auto"
             aria-hidden={currentScreen !== 'ranking'}
+            {...(currentScreen !== 'ranking' ? { inert: true } : {})}
           >
             <RankingScreen data={competition.data} active={currentScreen === 'ranking'} />
-          </div>
+          </section>
         </div>
       </div>
     </div>
