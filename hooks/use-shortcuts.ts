@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+
 import { hasSystemModifierKey, isFormElementFocused } from '@/lib/dom-utils';
 
 interface ShortcutHandlers {

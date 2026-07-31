@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
+
 import { localCompetitionStorage } from '@/lib/storage';
-import { CompetitionData } from '@/lib/types';
+import type { CompetitionData } from '@/lib/types';
 
 export function useCompetitionStorage(initialValue: CompetitionData) {
   const [value, setValue] = useState<CompetitionData>(initialValue);

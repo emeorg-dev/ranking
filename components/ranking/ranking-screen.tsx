@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo,useRef, useState } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
-import { CompetitionData } from '@/lib/types';
+
 import { Button } from '@/components/ui/button';
+import { assignRanks,calculateRanking } from '@/lib/competition/ranking';
+import { sortRounds } from '@/lib/competition/rounds';
+import type { CompetitionData } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { calculateRanking, assignRanks } from '@/lib/competition/ranking';
 
 interface RankingScreenProps {
   data: CompetitionData;
@@ -13,26 +15,38 @@ interface RankingScreenProps {
 }
 
 const PODIUM = [
-  { ring: 'ring-1 ring-primary/30', label: '1st' },
-  { ring: 'ring-1 ring-border', label: '2nd' },
-  { ring: 'ring-1 ring-border', label: '3rd' },
+  { ring: 'ring-1 ring-primary/30', label: '1.°' },
+  { ring: 'ring-1 ring-border', label: '2.°' },
+  { ring: 'ring-1 ring-border', label: '3.°' },
 ];
 
-export function RankingScreen({
-  data,
-  active = true,
-}: RankingScreenProps) {
+export function RankingScreen({ data, active = true }: RankingScreenProps) {
+  const orderedRounds = useMemo(() => sortRounds(data.rounds), [data.rounds]);
+
   const [selectedRoundIndex, setSelectedRoundIndex] = useState(
-    Math.max(0, data.rounds.length - 1)
+    Math.max(0, orderedRounds.length - 1)
   );
   const [revealed, setRevealed] = useState(false);
 
-  // Sync selectedRoundIndex if rounds are removed
+  const previousRoundsCountRef = useRef(orderedRounds.length);
+
+  // Sync selectedRoundIndex when rounds are added or removed
   useEffect(() => {
-    setSelectedRoundIndex((prev) =>
-      data.rounds.length === 0 ? 0 : Math.min(prev, data.rounds.length - 1)
-    );
-  }, [data.rounds.length]);
+    const previousCount = previousRoundsCountRef.current;
+    const previousLastIndex = Math.max(0, previousCount - 1);
+    const newLastIndex = Math.max(0, orderedRounds.length - 1);
+
+    setSelectedRoundIndex((currentIndex) => {
+      if (orderedRounds.length > previousCount && currentIndex === previousLastIndex) {
+        // Was viewing last round → advance to the new last round
+        return newLastIndex;
+      }
+      // Otherwise clamp to a valid index (handles deletions)
+      return Math.min(currentIndex, newLastIndex);
+    });
+
+    previousRoundsCountRef.current = orderedRounds.length;
+  }, [orderedRounds.length]);
 
   // Toggle reveal with the R key while the ranking screen is visible
   useEffect(() => {
@@ -59,19 +73,22 @@ export function RankingScreen({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [active]);
 
-  const activeRounds = data.rounds.slice(0, selectedRoundIndex + 1);
+  const activeRounds = orderedRounds.slice(0, selectedRoundIndex + 1);
   const activeRoundIds = new Set(activeRounds.map((r) => r.id));
   const rankedTeams = assignRanks(calculateRanking(data, activeRoundIds));
+
+  const hasPendingScores = rankedTeams.some((team) => !team.isComplete);
 
   return (
     <div className="w-full px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
-            Rankings
-          </h2>
+          <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+            {data.name}
+          </h1>
+          <h2 className="mt-0.5 text-base font-medium text-muted-foreground">Ranking</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {revealed ? 'Scores revealed' : 'Scores hidden — reveal when ready'}
+            {revealed ? 'Ranking visible' : 'Ranking oculto — mostrar cuando esté listo'}
           </p>
         </div>
 
@@ -86,20 +103,20 @@ export function RankingScreen({
           ) : (
             <Eye className="size-4" aria-hidden="true" />
           )}
-          {revealed ? 'Hide scores' : 'Reveal scores'}
+          {revealed ? 'Ocultar ranking' : 'Mostrar ranking'}
           <kbd className="ml-1 hidden rounded border border-current/20 px-1.5 py-0.5 text-[10px] font-medium opacity-70 sm:inline">
             R
           </kbd>
         </Button>
       </header>
 
-      {/* Round selector */}
-      {data.rounds.length > 1 && (
+      {/* Selector de ronda */}
+      {orderedRounds.length > 1 && (
         <div className="mb-8 flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-xs uppercase tracking-wide text-muted-foreground">
-            Through round
+            Hasta
           </span>
-          {data.rounds.map((round, index) => (
+          {orderedRounds.map((round, index) => (
             <Button
               key={round.id}
               variant="ghost"
@@ -117,14 +134,19 @@ export function RankingScreen({
         </div>
       )}
 
-      {/* Rankings */}
+      {/* Advertencia general de puntajes pendientes */}
+      {hasPendingScores && (
+        <p className="mb-4 rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+          ⚠ El ranking contiene equipos con puntajes pendientes.
+        </p>
+      )}
+
+      {/* Ranking */}
       <ol className="flex flex-col gap-2.5">
         {rankedTeams.map((team, index) => {
-          const roundScores = activeRounds.map(r => team.scores[r.id]);
-          // Use explicit rank for podium
           const podiumIndex = team.rank - 1;
           const podium = podiumIndex >= 0 && podiumIndex < 3 ? PODIUM[podiumIndex] : null;
-          
+
           // Reveal from last place up to first for a countdown feel
           const revealDelay = (rankedTeams.length - 1 - index) * 110;
 
@@ -137,7 +159,7 @@ export function RankingScreen({
               )}
               style={{ animationDelay: `${index * 60}ms` }}
             >
-              {/* Hidden-state hint */}
+              {/* Hidden-state overlay */}
               <div
                 aria-hidden="true"
                 className={cn(
@@ -147,19 +169,17 @@ export function RankingScreen({
                 style={{ transitionDelay: `${revealed ? revealDelay : 0}ms` }}
               >
                 <Lock className="size-3.5" />
-                Hidden
+                Ranking oculto
               </div>
 
               <div
                 className={cn(
                   'flex items-center gap-4 transition-all duration-700 ease-out',
-                  revealed
-                    ? 'blur-0 opacity-100'
-                    : 'select-none blur-md opacity-40'
+                  revealed ? 'blur-0 opacity-100' : 'select-none blur-md opacity-40'
                 )}
                 style={{ transitionDelay: `${revealed ? revealDelay : 0}ms` }}
               >
-                {/* Position */}
+                {/* Posición */}
                 <span
                   className={cn(
                     'flex size-9 shrink-0 items-center justify-center rounded-full border text-sm font-semibold tabular-nums',
@@ -171,7 +191,7 @@ export function RankingScreen({
                   {team.rank}
                 </span>
 
-                {/* Team */}
+                {/* Equipo */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
                     <p className="truncate font-medium">{team.name}</p>
@@ -182,7 +202,7 @@ export function RankingScreen({
                     )}
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    {activeRounds.map((r, i) => (
+                    {activeRounds.map((r) => (
                       <span key={r.id} className="tabular-nums">
                         {r.name}
                         <span className="ml-1 font-medium text-foreground/80">
@@ -191,6 +211,12 @@ export function RankingScreen({
                       </span>
                     ))}
                   </div>
+                  {!team.isComplete && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {team.pendingRounds} resultado{team.pendingRounds !== 1 ? 's' : ''} pendiente
+                      {team.pendingRounds !== 1 ? 's' : ''}
+                    </p>
+                  )}
                 </div>
 
                 {/* Total */}
@@ -199,8 +225,7 @@ export function RankingScreen({
                     {team.total}
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    {activeRounds.length} round
-                    {activeRounds.length !== 1 ? 's' : ''}
+                    {activeRounds.length} ronda{activeRounds.length !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>
@@ -211,7 +236,7 @@ export function RankingScreen({
 
       {rankedTeams.length === 0 && (
         <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No teams yet. Add teams in Score Entry.
+          Todavía no hay equipos. Agregalos en Ingreso de puntajes.
         </p>
       )}
     </div>

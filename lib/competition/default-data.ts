@@ -1,4 +1,4 @@
-import { CompetitionData } from '@/lib/types';
+import type { CompetitionData } from '@/lib/types';
 
 export function getEmptyData(name = 'Nueva Competencia'): CompetitionData {
   return {
@@ -24,10 +24,10 @@ export function getDemoData(): CompetitionData {
   return {
     name: 'Competencia de Demostración',
     teams: [
-      { id: t1, name: 'Team Alpha' },
-      { id: t2, name: 'Team Beta' },
-      { id: t3, name: 'Team Gamma' },
-      { id: t4, name: 'Team Delta' },
+      { id: t1, name: 'Team Alpha', order: 1 },
+      { id: t2, name: 'Team Beta', order: 2 },
+      { id: t3, name: 'Team Gamma', order: 3 },
+      { id: t4, name: 'Team Delta', order: 4 },
     ],
     rounds: [
       { id: r1, name: 'Ronda 1', order: 1 },

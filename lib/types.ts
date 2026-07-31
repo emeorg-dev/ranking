@@ -1,6 +1,7 @@
 export interface Team {
   id: string;
   name: string;
+  order: number;
 }
 
 export interface Round {
@@ -26,4 +27,6 @@ export interface RankedTeam extends Team {
   scores: Record<string, number | null>; // Maps roundId to score
   total: number;
   rank: number;
+  pendingRounds: number;
+  isComplete: boolean;
 }
