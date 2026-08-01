@@ -3,11 +3,10 @@
 import { useCallback, useState } from 'react';
 
 import { useLanguage } from '@/components/language/language-provider';
-import { LanguageSelect } from '@/components/language/language-select';
+import { Footer } from '@/components/navigation/footer';
 import { ScreenNavigation } from '@/components/navigation/screen-navigation';
 import { RankingScreen } from '@/components/ranking/ranking-screen';
 import { ScoreEntryScreen } from '@/components/score-entry/score-entry-screen';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCompetition } from '@/hooks/use-competition';
 import { useCompetitionStorage } from '@/hooks/use-local-storage';
@@ -62,19 +61,22 @@ export function RankingApp() {
             {...(currentScreen !== 'entry' ? { inert: true } : {})}
           >
             <ScrollArea className="h-full">
-              <ScoreEntryScreen
-                data={competition.data}
-                onSetScore={competition.setScore}
-                onAddTeam={competition.addTeam}
-                onRemoveTeam={competition.removeTeam}
-                onAddRound={() =>
-                  competition.addRound(`Ronda ${competition.data.rounds.length + 1}`)
-                }
-                onRemoveRound={competition.removeRound}
-                onUpdateCompetitionName={competition.updateCompetitionName}
-                onToggleShowName={competition.toggleShowName}
-                onUpdateTeamName={competition.updateTeamName}
-              />
+              <div className="flex min-h-full flex-col">
+                <ScoreEntryScreen
+                  data={competition.data}
+                  onSetScore={competition.setScore}
+                  onAddTeam={competition.addTeam}
+                  onRemoveTeam={competition.removeTeam}
+                  onAddRound={() =>
+                    competition.addRound(`Ronda ${competition.data.rounds.length + 1}`)
+                  }
+                  onRemoveRound={competition.removeRound}
+                  onUpdateCompetitionName={competition.updateCompetitionName}
+                  onToggleShowName={competition.toggleShowName}
+                  onUpdateTeamName={competition.updateTeamName}
+                />
+                <Footer />
+              </div>
             </ScrollArea>
           </section>
 
@@ -88,14 +90,6 @@ export function RankingApp() {
           </section>
         </div>
       </div>
-      
-      {/* Footer con configuraciones */}
-      <footer className="border-t bg-muted/40 p-3 sm:px-6">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-          <ThemeToggle />
-          <LanguageSelect />
-        </div>
-      </footer>
     </div>
   );
 }

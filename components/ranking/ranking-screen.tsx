@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 
+import { Footer } from '@/components/navigation/footer';
 import { RankingHeader } from '@/components/ranking/ranking-header';
 import { RankingList } from '@/components/ranking/ranking-list';
 import { RoundSelector } from '@/components/ranking/round-selector';
@@ -42,7 +43,8 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
       viewportRef={reveal.scrollContainerRef}
       className="h-full"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+      <div className="flex min-h-full flex-col">
+        <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         <RankingHeader
           competitionName={data.name}
           showName={data.showName !== false}
@@ -70,6 +72,8 @@ export function RankingScreen({ data, active = true }: RankingScreenProps) {
           revealedCount={reveal.revealedCount}
           itemRefs={reveal.itemRefs}
         />
+        </div>
+        <Footer />
       </div>
     </ScrollArea>
   );
