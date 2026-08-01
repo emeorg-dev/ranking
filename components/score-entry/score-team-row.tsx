@@ -70,7 +70,7 @@ export function ScoreTeamRow({
               aria-label={`${team.name} ${round.name} puntaje`}
               value={score ?? ''}
               onChange={(e) => handleScoreChange(round.id, e.target.value)}
-              className="h-8 border-transparent bg-transparent text-center tabular-nums shadow-none hover:border-input focus-visible:border-input"
+              className="h-8 text-center tabular-nums"
             />
           </TableCell>
         );
