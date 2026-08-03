@@ -1,5 +1,5 @@
-import { en } from "./dictionaries/en";
-import { es } from "./dictionaries/es";
+import { en } from "./en";
+import { es } from "./es";
 import type { Locale, TranslationDictionary } from "./types";
 
 export type { Locale as LangCode, Locale, TranslationDictionary };

@@ -1,4 +1,6 @@
-export const es = {
+import type { TranslationDictionary } from "./types";
+
+export const es: TranslationDictionary = {
   common: {
     theme: {
       label: "Tema",
@@ -74,4 +76,4 @@ export const es = {
       deleteRoundConfirm: "Eliminar ronda",
     },
   },
-} as const;
+};

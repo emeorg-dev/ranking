@@ -1,30 +1,80 @@
-export type Locale = "es" | "en";
+export type Locale = "es" | "en"
 
-export type BaseDictionary = typeof import("./dictionaries/es").es;
+export type TranslationDictionary = {
+  common: {
+    theme: {
+      label: string
+      light: string
+      dark: string
+      system: string
+    }
+    language: {
+      label: string
+      spanish: string
+      english: string
+    }
+    actions: {
+      cancel: string
+      close: string
+      confirm: string
+      changeScreen: string
+      showRanking: string
+      reset: string
+    }
+    status: {
+      loading: string
+    }
+  }
+  ranking: {
+    common: {
+      title: string
+    }
+    navigation: {
+      scores: string
+      ranking: string
+    }
+    reveal: {
+      revealing: string
+      visible: string
+      hidden: string
+      instantView: string
+      show: string
+      showAll: string
+      hide: string
+    }
+    settings: {
+      competitionName: string
+      showName: string
+    }
+    scoreEntry: {
+      title: string
+      team: string
+      teams: string
+      round: string
+      rounds: string
+      searchTeams: string
+      addTeamPlaceholder: string
+      addTeam: string
+      addRound: string
+    }
+    table: {
+      team: string
+      total: string
+      roundName: string
+      unnamedRound: string
+      deleteTeam: string
+      deleteRound: string
+      noTeamsYet: string
+      noTeamsMatch: string
+    }
+    dialogs: {
+      deleteTeamTitle: string
+      deleteTeamDesc: string
+      deleteTeamConfirm: string
+      deleteRoundTitle: string
+      deleteRoundDesc: string
+      deleteRoundConfirm: string
+    }
+  }
+}
 
-// Recursively convert string literal types to string
-export type RelaxStringLiterals<T> = T extends string
-  ? string
-  : T extends object
-    ? { [K in keyof T]: RelaxStringLiterals<T[K]> }
-    : T;
-
-export type TranslationDictionary = RelaxStringLiterals<BaseDictionary>;
-
-export type PathsToStringProps<T> = T extends string
-  ? []
-  : {
-      [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
-    }[Extract<keyof T, string>];
-
-export type Join<T extends string[], D extends string> = T extends []
-  ? never
-  : T extends [infer F]
-    ? F
-    : T extends [infer F, ...infer R]
-      ? F extends string
-        ? `${F}${D}${Join<Extract<R, string[]>, D>}`
-        : never
-      : string;
-
-export type TranslationKey = Join<PathsToStringProps<BaseDictionary>, ".">;
