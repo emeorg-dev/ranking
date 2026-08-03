@@ -1,7 +1,7 @@
 {
-  "name": "Timer",
-  "short_name": "Timer",
-  "description": "Un temporizador minimalista y accesible que anuncia el tiempo restante o transcurrido por voz en múltiples idiomas.",
+  "name": "Ranking",
+  "short_name": "Ranking",
+  "description": "Una aplicación para gestionar clasificaciones y puntuaciones.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
