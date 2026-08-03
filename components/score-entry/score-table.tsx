@@ -77,7 +77,7 @@ export function ScoreTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredTeams.map((team) => (
+          {filteredTeams.map((team, index) => (
             <ScoreTeamRow
               key={team.id}
               team={team}
@@ -86,6 +86,7 @@ export function ScoreTable({
               onSetScore={onSetScore}
               onUpdateTeamName={onUpdateTeamName}
               onRequestDelete={onRequestDeleteTeam}
+              index={index}
             />
           ))}
         </TableBody>

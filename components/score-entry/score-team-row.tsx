@@ -15,6 +15,7 @@ interface ScoreTeamRowProps {
   onSetScore: (teamId: string, roundId: string, value: number | null) => void;
   onUpdateTeamName: (teamId: string, name: string) => void;
   onRequestDelete: (team: Team) => void;
+  index: number;
 }
 
 export function ScoreTeamRow({
@@ -24,8 +25,11 @@ export function ScoreTeamRow({
   onSetScore,
   onUpdateTeamName,
   onRequestDelete,
+  index,
 }: ScoreTeamRowProps) {
   let total = 0;
+  
+  const isEven = index % 2 === 0;
 
   const handleScoreChange = (roundId: string, value: string) => {
     if (value === '') {
@@ -45,13 +49,13 @@ export function ScoreTeamRow({
   };
 
   return (
-    <TableRow className="hover:bg-muted/30">
-      <TableCell className="sticky left-0 z-10 min-w-36 bg-card px-3 py-2 text-left font-medium">
+    <TableRow className={`border-b-0 hover:bg-muted/30 ${isEven ? 'bg-muted/20' : 'bg-transparent'}`}>
+      <TableCell className={`sticky left-0 z-10 min-w-36 px-3 py-2 text-left font-medium ${isEven ? 'bg-card brightness-95 dark:brightness-110' : 'bg-card'}`}>
         <Input
           value={team.name}
           onChange={(e) => onUpdateTeamName(team.id, e.target.value)}
           onBlur={(e) => handleNameBlur(e.target.value)}
-          className="h-7 truncate border-transparent bg-transparent px-1 font-medium shadow-none hover:border-input focus-visible:border-input"
+          className="h-7 border-none bg-transparent px-1 font-medium shadow-none focus-visible:ring-0 dark:bg-transparent hover:bg-accent focus-visible:bg-accent"
           aria-label={`Nombre del equipo ${team.name}`}
         />
       </TableCell>
