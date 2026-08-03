@@ -49,7 +49,7 @@ export function ScoreTeamRow({
   };
 
   return (
-    <TableRow className={`border-b-0 hover:bg-muted/30 ${isEven ? 'bg-muted/20' : 'bg-transparent'}`}>
+    <TableRow className={`group border-b-0 hover:bg-muted/30 ${isEven ? 'bg-muted/20' : 'bg-transparent'}`}>
       <TableCell className={`sticky left-0 z-10 min-w-36 px-3 py-2 text-left font-medium ${isEven ? 'bg-card brightness-95 dark:brightness-110' : 'bg-card'}`}>
         <Input
           value={team.name}
@@ -88,7 +88,7 @@ export function ScoreTeamRow({
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 text-muted-foreground hover:text-destructive"
+          className="size-8 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/15 hover:text-destructive"
           onClick={() => onRequestDelete(team)}
         >
           <X className="size-4" aria-hidden="true" />

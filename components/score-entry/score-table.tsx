@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 
 import { useLanguage } from '@/components/language/language-provider';
 import { ScoreTeamRow } from '@/components/score-entry/score-team-row';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -60,13 +61,15 @@ export function ScoreTable({
                   >
                     {t('ranking.table.roundName').replace('{0}', (index + 1).toString())}
                   </span>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => onRequestDeleteRound(round)}
-                    className="shrink-0 text-destructive opacity-0 transition-opacity group-hover:opacity-100"
+                    className="size-6 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/15 hover:text-destructive"
                     title={t('ranking.table.deleteRound')}
                   >
-                    <X className="size-3" />
-                  </button>
+                    <X className="size-3.5" />
+                  </Button>
                 </div>
               </TableHead>
             ))}
